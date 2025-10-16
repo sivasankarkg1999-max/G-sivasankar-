@@ -1,0 +1,68 @@
+#include <reg51.h> // Include header for 8051 registers
+
+// Define LCD control pins
+sbit RS = P0^0; // Register Select pin
+sbit RW = P0^1; // Read/Write pin
+sbit EN = P0^2; // Enable pin
+
+#define LCD_DATA_PORT P2 // LCD data lines connected to Port 2
+
+// Function to create a delay
+void delay(unsigned int ms) {
+    unsigned int i, j;
+    for (i = 0; i < ms; i++)
+        for (j = 0; j < 1275; j++); // Adjust for desired delay
+}
+
+// Function to send a command to the LCD
+void lcd_cmd(unsigned char cmd) {
+    LCD_DATA_PORT = cmd; // Send command to data port
+    RS = 0;              // Command mode
+    RW = 0;              // Write mode
+    EN = 1;              // Enable pulse
+    delay(1);
+    EN = 0;
+    delay(5);            // Give time for LCD to process command
+}
+
+// Function to send data to the LCD
+void lcd_data(unsigned char dat) {
+    LCD_DATA_PORT = dat; // Send data to data port
+    RS = 1;              // Data mode
+    RW = 0;              // Write mode
+    EN = 1;              // Enable pulse
+    delay(1);
+    EN = 0;
+    delay(1);            // Give time for LCD to process data
+}
+
+// Function to initialize the LCD
+void lcd_init() {
+    lcd_cmd(0x38); // 8-bit mode, 2 lines, 5x7 matrix
+    lcd_cmd(0x0C); // Display ON, Cursor OFF, Blink OFF
+    lcd_cmd(0x06); // Increment cursor, no shift
+    lcd_cmd(0x01); // Clear display
+    delay(20);     // Long delay after clear
+}
+
+// Main function
+void main() {
+    lcd_init();         // Initialize LCD
+
+    lcd_cmd(0x80);      // Move cursor to first position of first line
+    lcd_data('H');
+    lcd_data('e');
+    lcd_data('l');
+    lcd_data('l');
+    lcd_data('o');
+
+    lcd_cmd(0xC0);      // Move cursor to first position of second line
+    lcd_data('W');
+    lcd_data('o');
+    lcd_data('r');
+    lcd_data('l');
+    lcd_data('d');
+    lcd_data('!');
+
+    while(1); // Infinite loop to keep the display active
+}
